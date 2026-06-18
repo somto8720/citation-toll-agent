@@ -15,16 +15,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Initialize Database & Hydrate with RSS
+// Initialize Database
 initDb();
-hydrateFromRSS().catch(console.error);
 
 // Routes
 app.use('/api', ingestRouter);
 
+let isHydrated = false;
+
 // 1. Free Catalog Endpoint
-app.get('/api/catalog', (req, res) => {
+app.get('/api/catalog', async (req, res) => {
     try {
+        if (!isHydrated) {
+            console.log('Performing cold-start RSS hydration...');
+            await hydrateFromRSS();
+            isHydrated = true;
+        }
         const articles = getCatalogArticles();
         res.json({ success: true, articles });
     } catch (e: any) {
