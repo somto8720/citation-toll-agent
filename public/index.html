@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citation Toll Agent Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="glass-panel sidebar">
+            <div class="logo">
+                <div class="lepton-coin">Λ</div>
+                <h2>Citation Agent</h2>
+            </div>
+            <nav>
+                <ul>
+                    <li class="active"><a href="#dashboard">Dashboard</a></li>
+                    <li><a href="#articles">Articles</a></li>
+                    <li><a href="#agent-logs">Agent Logs</a></li>
+                    <li><a href="#settings">Settings</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="glass-panel top-nav">
+                <div class="stats-overview">
+                    <div class="stat-card">
+                        <span class="label">Total Earned (USDC)</span>
+                        <h3 id="total-earned">$0.000</h3>
+                    </div>
+                    <div class="stat-card">
+                        <span class="label">Total Citations</span>
+                        <h3 id="total-citations">0</h3>
+                    </div>
+                    <div class="stat-card">
+                        <span class="label">Active Articles</span>
+                        <h3 id="active-articles">0</h3>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <!-- Earnings Chart -->
+                <section class="glass-panel chart-section">
+                    <h3>Revenue Velocity</h3>
+                    <canvas id="earningsChart"></canvas>
+                </section>
+
+                <!-- Agent Reasoning Log -->
+                <section class="glass-panel agent-log">
+                    <h3>Pricing Agent Activity</h3>
+                    <div class="log-container" id="agent-logs-container">
+                        <!-- Log entries will be injected here -->
+                    </div>
+                </section>
+            </div>
+
+            <div class="bottom-grid">
+                <section class="glass-panel content-management">
+                    <h3>Content Catalog</h3>
+                    <table class="catalog-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Current Price</th>
+                                <th>Citations</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="catalog-body">
+                            <!-- Catalog items -->
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
