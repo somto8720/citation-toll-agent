@@ -38,60 +38,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Mock data for initial render until backend is fully wired
-    const mockCatalog = [
-        { title: 'The Future of AI Agents', price: 0.005, citations: 42, status: 'Active' },
-        { title: 'Arc Nanopayments Deep Dive', price: 0.012, citations: 15, status: 'Active' },
-        { title: 'State of LLM Scraping', price: 0.001, citations: 3, status: 'Active' }
-    ];
-
-    const mockLogs = [
-        { msg: 'Increased "Arc Nanopayments" by 15%', reason: 'Demand velocity > 5/hr', type: 'increase' },
-        { msg: 'Decreased "State of LLM" by 5%', reason: 'Low citations & age > 7 days', type: 'decrease' },
-        { msg: 'Increased "Future of AI" by 10%', reason: 'Unique AI consumers rising rapidly', type: 'increase' }
-    ];
-
-    // Render Catalog
-    const catalogBody = document.getElementById('catalog-body');
-    mockCatalog.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${item.title}</td>
-            <td style="color: var(--success);">$${item.price.toFixed(3)}</td>
-            <td>${item.citations}</td>
-            <td><span style="background: rgba(16,185,129,0.2); color: #10b981; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">${item.status}</span></td>
-        `;
-        catalogBody.appendChild(row);
-    });
-
-    // Render Logs
-    const logContainer = document.getElementById('agent-logs-container');
-    mockLogs.forEach(log => {
-        const div = document.createElement('div');
-        div.className = `log-entry ${log.type}`;
-        div.innerHTML = `
-            <strong>${log.msg}</strong>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">Reason: ${log.reason}</p>
-        `;
-        logContainer.appendChild(div);
-    });
-
-    // We would fetch real data here
+    // Fetch live data from backend
     async function fetchData() {
         try {
-            const statsRes = await fetch('http://localhost:3000/api/stats');
+            // Fetch stats
+            const statsRes = await fetch('/api/stats');
             const stats = await statsRes.json();
-            if(stats.success) {
+            
+            // Fetch catalog
+            const catalogRes = await fetch('/api/catalog');
+            const catalog = await catalogRes.json();
+
+            if(stats.success && catalog.success) {
+                // Update Overview Cards
                 document.getElementById('total-earned').innerText = `$${stats.stats.totalEarned.toFixed(3)}`;
                 document.getElementById('total-citations').innerText = stats.stats.citations;
+                document.getElementById('active-articles').innerText = catalog.articles.length;
+
+                // Render Catalog Table
+                const catalogBody = document.getElementById('catalog-body');
+                catalogBody.innerHTML = ''; // Clear mocks
+                
+                catalog.articles.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.title.substring(0, 50)}${item.title.length > 50 ? '...' : ''}</td>
+                        <td style="color: var(--success);">$${item.current_price.toFixed(3)}</td>
+                        <td>--</td>
+                        <td><span style="background: rgba(16,185,129,0.2); color: #10b981; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">Active</span></td>
+                    `;
+                    catalogBody.appendChild(row);
+                });
             }
         } catch(e) {
-            console.log('Backend not fully hooked up yet, using mock values.');
-            document.getElementById('total-earned').innerText = '$0.250';
-            document.getElementById('total-citations').innerText = '60';
-            document.getElementById('active-articles').innerText = '3';
+            console.error('Failed to fetch live data:', e);
         }
     }
 
+    // Refresh every 5 seconds to show live traffic bot hits
     fetchData();
+    setInterval(fetchData, 5000);
 });
