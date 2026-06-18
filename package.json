@@ -15,6 +15,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "node-fetch": "^3.3.2",
+    "rss-parser": "^3.13.0",
     "@circle-fin/x402-batching": "*",
     "@langchain/openai": "*",
     "@langchain/core": "*"

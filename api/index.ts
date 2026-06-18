@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { initDb } from '../src/db/schema';
+import { hydrateFromRSS } from '../src/attribution/rss-ingest';
 import { requirePayment } from '../src/server/middleware/gateway';
 import ingestRouter from '../src/server/routes/ingest';
 import { getCatalogArticles, getArticleById, getStats, logCitation } from '../src/db/queries';
@@ -14,8 +15,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Initialize Database
+// Initialize Database & Hydrate with RSS
 initDb();
+hydrateFromRSS().catch(console.error);
 
 // Routes
 app.use('/api', ingestRouter);
