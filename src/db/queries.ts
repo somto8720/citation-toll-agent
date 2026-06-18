@@ -5,6 +5,7 @@ export function getCatalogArticles() {
         id: a.id,
         title: a.title,
         preview: a.preview,
+        source_url: a.source_url,
         current_price: a.current_price,
         created_at: a.created_at
     }));

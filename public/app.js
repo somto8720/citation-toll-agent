@@ -24,8 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 catalog.articles.forEach(item => {
                     const row = document.createElement('tr');
+                    const link = item.source_url ? `<a href="${item.source_url}" target="_blank" style="color: var(--text-primary); text-decoration: none;">${item.title.substring(0, 50)}${item.title.length > 50 ? '...' : ''}</a>` : item.title;
                     row.innerHTML = `
-                        <td>${item.title.substring(0, 50)}${item.title.length > 50 ? '...' : ''}</td>
+                        <td>${link}</td>
                         <td style="color: var(--success);">$${item.current_price.toFixed(3)}</td>
                         <td>--</td>
                         <td><span style="background: rgba(16,185,129,0.2); color: #10b981; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">Active</span></td>
