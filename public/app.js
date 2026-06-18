@@ -1,42 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Chart
-    const ctx = document.getElementById('earningsChart').getContext('2d');
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(56, 189, 248, 0.5)');
-    gradient.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
-
-    const earningsChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Today'],
-            datasets: [{
-                label: 'Revenue (USDC)',
-                data: [0.005, 0.015, 0.022, 0.045, 0.08, 0.12, 0.25],
-                borderColor: '#38bdf8',
-                backgroundColor: gradient,
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    ticks: { color: '#94a3b8' }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: '#94a3b8' }
-                }
-            }
-        }
-    });
+    // Chart removed for simplified dashboard layout
 
     // Fetch live data from backend
     async function fetchData() {

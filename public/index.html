@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Citation Toll Agent Dashboard</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Chart.js for visualizations -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -47,24 +45,9 @@
             </header>
 
             <div class="content-grid">
-                <!-- Earnings Chart -->
-                <section class="glass-panel chart-section">
-                    <h3>Revenue Velocity</h3>
-                    <canvas id="earningsChart"></canvas>
-                </section>
-
-                <!-- Agent Reasoning Log -->
-                <section class="glass-panel agent-log">
-                    <h3>Pricing Agent Activity</h3>
-                    <div class="log-container" id="agent-logs-container">
-                        <!-- Log entries will be injected here -->
-                    </div>
-                </section>
-            </div>
-
-            <div class="bottom-grid">
-                <section class="glass-panel content-management">
-                    <h3>Content Catalog</h3>
+                <!-- Content Catalog -->
+                <section class="glass-panel content-management" style="overflow-y: auto; max-height: calc(100vh - 180px);">
+                    <h3 style="margin-bottom: 1rem;">Content Catalog</h3>
                     <table class="catalog-table">
                         <thead>
                             <tr>
@@ -78,6 +61,14 @@
                             <!-- Catalog items -->
                         </tbody>
                     </table>
+                </section>
+
+                <!-- Agent Reasoning Log -->
+                <section class="glass-panel agent-log" style="overflow-y: auto; max-height: calc(100vh - 180px);">
+                    <h3 style="margin-bottom: 1rem;">Pricing Agent Activity</h3>
+                    <div class="log-container" id="agent-logs-container">
+                        <!-- Log entries will be injected here -->
+                    </div>
                 </section>
             </div>
         </main>
