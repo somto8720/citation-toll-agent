@@ -15,9 +15,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "node-fetch": "^3.3.2",
-    "@circle-fin/x402-batching": "^0.1.0",
-    "@langchain/openai": "^0.1.1",
-    "@langchain/core": "^0.2.1"
+    "@circle-fin/x402-batching": "*",
+    "@langchain/openai": "*",
+    "@langchain/core": "*"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
