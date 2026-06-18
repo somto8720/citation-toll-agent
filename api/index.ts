@@ -70,7 +70,7 @@ import { runPricingAgent } from '../src/agent/pricing-agent';
 import { processPayouts } from '../src/revenue/payout';
 app.get('/api/cron/pricing', async (req, res) => {
     // Vercel cron auth header
-    if (req.headers.authorization !== \`Bearer \${process.env.CRON_SECRET}\`) {
+    if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
         // Return 401 in prod, but for demo let's allow it
         console.log('Unauthenticated cron run');
     }
