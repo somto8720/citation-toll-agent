@@ -107,41 +107,49 @@ app.post('/api/articles/submit', async (req, res) => {
             return res.status(400).json({ error: 'Could not find any articles in that RSS feed.' });
         }
 
-        // Just take the newest one to demonstrate the feature
-        const item = feed.items[0];
-        if (!item) {
-            return res.status(400).json({ error: 'Feed is empty.' });
+        // Ingest up to 5 articles to populate the catalog
+        let addedCount = 0;
+        for (const item of feed.items.slice(0, 5)) {
+            if (!item) continue;
+            const sourceUrl = item.link || url;
+            const stableId = 'rss_' + crypto.createHash('md5').update(sourceUrl).digest('hex').substring(0, 8);
+
+            insertArticle(
+                stableId,
+                item.title || 'Untitled',
+                item.contentSnippet || item.content || 'No content snippet available.',
+                sourceUrl,
+                arc_wallet
+            );
+            addedCount++;
         }
-        
-        const sourceUrl = item.link || url;
-        const stableId = 'rss_' + crypto.createHash('md5').update(sourceUrl).digest('hex').substring(0, 8);
 
-        insertArticle(
-            stableId,
-            item.title || 'Untitled',
-            item.contentSnippet || item.content || 'No content snippet available.',
-            sourceUrl,
-            arc_wallet
-        );
-
-        res.json({ success: true, message: 'Article successfully registered and monetized.' });
+        res.json({ success: true, message: `Successfully registered and monetized ${addedCount} articles.` });
     } catch (e: any) {
         res.status(500).json({ error: 'Failed to process RSS feed: ' + e.message });
     }
 });
 
-// 4. Cron Job Endpoint for Vercel
+// 4. Cron Job & Manual Settlement
 import { runPricingAgent } from '../src/agent/pricing-agent';
 import { processPayouts } from '../src/revenue/payout';
+
 app.get('/api/cron/pricing', async (req, res) => {
-    // Vercel cron auth header
     if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
-        // Return 401 in prod, but for demo let's allow it
         console.log('Unauthenticated cron run');
     }
     await runPricingAgent();
     await processPayouts();
     res.json({ success: true, message: 'Cron job executed' });
+});
+
+app.post('/api/payout/force', async (req, res) => {
+    try {
+        await processPayouts();
+        res.json({ success: true, message: 'On-chain settlement triggered for all eligible balances.' });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 export default app;

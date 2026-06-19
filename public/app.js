@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     signupStatus.innerText = 'Success! Your articles are now monetized.';
                     signupStatus.style.display = 'block';
                     setTimeout(() => { signupStatus.style.display = 'none'; }, 5000);
-                    fetchData(); // Refresh catalog immediately
+                    refreshDashboard(); // Refresh catalog immediately
                 } else {
                     signupStatus.innerText = 'Error: ' + data.error;
                     signupStatus.style.color = 'var(--color-danger)';
@@ -46,8 +46,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Force Settlement Button
+    document.getElementById('force-settlement-btn')?.addEventListener('click', async (e) => {
+        const btn = e.target;
+        const originalText = btn.innerText;
+        btn.innerText = 'Settling...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/payout/force', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                btn.innerText = 'Settled!';
+                btn.style.backgroundColor = 'var(--color-success)';
+                btn.style.color = 'white';
+                refreshDashboard();
+            } else {
+                throw new Error(data.error);
+            }
+        } catch (err) {
+            console.error('Force settlement failed:', err);
+            btn.innerText = 'Error';
+            btn.style.backgroundColor = 'var(--color-danger)';
+        } finally {
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.disabled = false;
+                btn.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                btn.style.color = 'var(--color-primary)';
+            }, 3000);
+        }
+    });
+
     // Fetch live data from backend
-    async function fetchData() {
+    async function refreshDashboard() {
         try {
             // Fetch stats
             const statsRes = await fetch('/api/stats');
@@ -112,6 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initial fetch and poll
-    fetchData();
-    setInterval(fetchData, 5000);
+    refreshDashboard();
+    setInterval(refreshDashboard, 5000);
 });
