@@ -46,9 +46,11 @@ export function logCitation(articleId: string, consumerFingerprint: string, cons
 
 export function insertArticle(id: string, title: string, content: string, sourceUrl: string, creatorWallet: string) {
     const preview = content.length > 200 ? content.substring(0, 200) + '...' : content;
+    const randomBasePrice = Math.max(0.005, parseFloat((Math.random() * 0.02).toFixed(3)));
+    
     const newArticle = {
         id, title, content, preview, source_url: sourceUrl, creator_wallet: creatorWallet,
-        current_price: 0.005, min_price: 0.001, max_price: 0.05,
+        current_price: randomBasePrice, min_price: 0.001, max_price: 0.05, base_price: randomBasePrice,
         created_at: new Date().toISOString()
     };
     dbStore.articles.push(newArticle);
@@ -66,4 +68,9 @@ export function getStats() {
     const totalCitations = dbStore.citations.length;
     const totalEarned = dbStore.earnings.reduce((sum, e) => sum + e.amount, 0);
     return { citations: totalCitations, totalEarned: totalEarned };
+}
+
+export function getLogs() {
+    // Return latest 10 price adjustments, sorted newest first
+    return [...dbStore.price_adjustments].sort((a, b) => b.id - a.id).slice(0, 10);
 }

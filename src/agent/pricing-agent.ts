@@ -15,7 +15,7 @@ const model = new ChatOpenAI({
 
 const pricingPrompt = PromptTemplate.fromTemplate(`
 You are an autonomous pricing agent for an x402-powered content monetization layer.
-Your goal is to maximize creator revenue by dynamically adjusting article prices based on demand signals.
+Your goal is to maximize creator revenue by dynamically adjusting article prices based on demand signals and consumer semantics.
 
 Current Article: {title}
 Current Price: ${'{current_price}'}
@@ -28,17 +28,22 @@ Demand Signals snapshot (last 24 hours):
 - Velocity (citations per hour): {velocity}
 - Content Age (days): {age_days}
 
-Pricing Rules:
-1. If velocity is high (> 5/hr), increase price by 10-20% to capture demand.
-2. If citations are low and age > 7 days, decrease price by 5-10% to stimulate demand.
-3. If unique consumers are high (spreading fast), increase price.
-4. Never exceed Max Price or go below Min Price.
-5. If signals are flat/normal, keep the price the same.
+Consumer Fingerprints Observed:
+{consumer_fingerprints}
 
-Analyze the demand signals, explain your reasoning step-by-step, and output the NEW PRICE as a float.
+Pricing Rules & Semantic Reasoning:
+1. Identify the nature of the consumers. Are they enterprise commercial bots (e.g., OpenAI, Google, Bloomberg) or academic/hobbyist crawlers?
+2. If the consumers appear to be high-value enterprise bots, INCREASE the price to capture B2B value, even if velocity is moderate.
+3. If the consumers are mostly academic or non-profits, DECREASE or maintain the price to encourage widespread citation and academic distribution.
+4. If velocity is high (> 5/hr) from unknown scrapers, incrementally increase the price to prevent free-riding.
+5. If citations are low and age > 7 days, decrease price to stimulate demand.
+6. Never exceed Max Price or go below Min Price.
+
+Analyze the demand signals AND the semantic profile of the consumers. Explain your reasoning step-by-step, focusing on WHY these specific consumers should pay this specific price, and output the NEW PRICE as a float.
+
 Respond with JSON matching this schema:
 {{
-  "reasoning": "your step by step explanation",
+  "reasoning": "your step by step explanation including consumer profile analysis",
   "newPrice": 0.005
 }}
 `);
@@ -60,6 +65,7 @@ export async function runPricingAgent() {
         
         const velocity = citations_24h / 24.0;
         const age_days = (now.getTime() - new Date(article.created_at).getTime()) / (1000 * 60 * 60 * 24);
+        const fingerprintsList = Array.from(new Set(recentCitations.map(c => c.consumer_fingerprint))).join(', ') || 'None';
 
         const inputs = {
             title: article.title,
@@ -69,7 +75,8 @@ export async function runPricingAgent() {
             citations_24h: citations_24h,
             unique_consumers_24h: unique_consumers_24h,
             velocity: velocity.toFixed(2),
-            age_days: Math.floor(age_days)
+            age_days: Math.floor(age_days),
+            consumer_fingerprints: fingerprintsList
         };
 
         try {

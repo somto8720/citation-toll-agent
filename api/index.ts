@@ -5,7 +5,11 @@ import { initDb } from '../src/db/schema';
 import { hydrateFromRSS } from '../src/attribution/rss-ingest';
 import { requirePayment } from '../src/server/middleware/gateway';
 import ingestRouter from '../src/server/routes/ingest';
-import { getCatalogArticles, getArticleById, getStats, logCitation } from '../src/db/queries';
+import { getCatalogArticles, getArticleById, getStats, logCitation, getLogs, insertArticle } from '../src/db/queries';
+import Parser from 'rss-parser';
+import crypto from 'crypto';
+
+const parser = new Parser();
 
 dotenv.config();
 
@@ -78,6 +82,51 @@ app.get('/api/stats', (req, res) => {
         res.json({ success: true, stats });
     } catch (e: any) {
         res.status(500).json({ error: e.message });
+    }
+});
+
+// 3.1 Agent Reasoning Logs
+app.get('/api/logs', (req, res) => {
+    try {
+        res.json({ success: true, logs: getLogs() });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 3.2 Publisher Sign Up (RSS Submission)
+app.post('/api/articles/submit', async (req, res) => {
+    try {
+        const { url, arc_wallet } = req.body;
+        if (!url || !arc_wallet) {
+            return res.status(400).json({ error: 'URL and Arc Wallet are required.' });
+        }
+
+        const feed = await parser.parseURL(url);
+        if (!feed || !feed.items || feed.items.length === 0) {
+            return res.status(400).json({ error: 'Could not find any articles in that RSS feed.' });
+        }
+
+        // Just take the newest one to demonstrate the feature
+        const item = feed.items[0];
+        if (!item) {
+            return res.status(400).json({ error: 'Feed is empty.' });
+        }
+        
+        const sourceUrl = item.link || url;
+        const stableId = 'rss_' + crypto.createHash('md5').update(sourceUrl).digest('hex').substring(0, 8);
+
+        insertArticle(
+            stableId,
+            item.title || 'Untitled',
+            item.contentSnippet || item.content || 'No content snippet available.',
+            sourceUrl,
+            arc_wallet
+        );
+
+        res.json({ success: true, message: 'Article successfully registered and monetized.' });
+    } catch (e: any) {
+        res.status(500).json({ error: 'Failed to process RSS feed: ' + e.message });
     }
 });
 

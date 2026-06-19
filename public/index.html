@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Citation Toll Agent Dashboard</title>
+    <title>Citation Toll Agent | Pro Max</title>
+    <!-- Premium UI: Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
         <!-- Sidebar -->
-        <aside class="glass-panel sidebar">
+        <aside class="glass sidebar">
             <div class="logo">
                 <div class="lepton-coin">Λ</div>
                 <h2>Citation Agent</h2>
@@ -18,27 +20,38 @@
             <nav>
                 <ul>
                     <li class="active"><a href="#dashboard">Dashboard</a></li>
-                    <li><a href="#articles">Articles</a></li>
-                    <li><a href="#agent-logs">Agent Logs</a></li>
-                    <li><a href="#settings">Settings</a></li>
+                    <li><a href="#articles">Content Catalog</a></li>
+                    <li><a href="#agent-logs">Agent Intelligence</a></li>
                 </ul>
             </nav>
+
+            <!-- Publisher Sign Up Box -->
+            <div class="publisher-signup">
+                <h4>Monetize Your RSS Feed</h4>
+                <p>Register your blog to earn testnet USDC whenever an AI agent cites your work.</p>
+                <form id="signup-form">
+                    <input type="url" id="rss-url" class="input-field" placeholder="https://yourblog.com/rss.xml" required>
+                    <input type="text" id="arc-wallet" class="input-field" placeholder="Arc Wallet Address (0x...)" required>
+                    <button type="submit" class="btn-primary" id="signup-btn">Start Earning</button>
+                </form>
+                <div id="signup-status" style="font-size: 0.75rem; margin-top: 8px; color: var(--color-success); display: none;"></div>
+            </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="glass-panel top-nav" id="dashboard">
+            <header class="glass top-nav" id="dashboard">
                 <div class="stats-overview">
                     <div class="stat-card">
                         <span class="label">Total Earned (USDC)</span>
                         <h3 id="total-earned">$0.000</h3>
                     </div>
                     <div class="stat-card">
-                        <span class="label">Total Citations</span>
+                        <span class="label">Total AI Citations</span>
                         <h3 id="total-citations">0</h3>
                     </div>
                     <div class="stat-card">
-                        <span class="label">Active Articles</span>
+                        <span class="label"><span class="live-indicator"></span>Active Articles</span>
                         <h3 id="active-articles">0</h3>
                     </div>
                 </div>
@@ -46,28 +59,30 @@
 
             <div class="content-grid">
                 <!-- Content Catalog -->
-                <section class="glass-panel content-management" id="articles" style="overflow-y: auto; max-height: calc(100vh - 180px);">
-                    <h3 style="margin-bottom: 1rem;">Content Catalog</h3>
+                <section class="glass section-container" id="articles">
+                    <h3>Content Catalog</h3>
                     <table class="catalog-table">
                         <thead>
                             <tr>
                                 <th>Title</th>
-                                <th>Current Price</th>
-                                <th>Citations</th>
+                                <th>Price</th>
+                                <th>Creator</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="catalog-body">
-                            <!-- Catalog items -->
+                            <!-- Catalog items injected via JS -->
                         </tbody>
                     </table>
                 </section>
 
                 <!-- Agent Reasoning Log -->
-                <section class="glass-panel agent-log" style="overflow-y: auto; max-height: calc(100vh - 180px);">
-                    <h3 style="margin-bottom: 1rem;">Pricing Agent Activity</h3>
+                <section class="glass section-container" id="agent-logs">
+                    <h3>Pricing Agent Intelligence</h3>
                     <div class="log-container" id="agent-logs-container">
-                        <!-- Log entries will be injected here -->
+                        <div style="color: var(--color-muted); font-size: 0.85rem; text-align: center; margin-top: 2rem;">
+                            Waiting for pricing signals...
+                        </div>
                     </div>
                 </section>
             </div>

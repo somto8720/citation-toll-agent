@@ -4,21 +4,24 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "register-secret": "ts-node scripts/register-entity-secret.ts",
+    "create-wallet": "ts-node scripts/create-wallet.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "express": "^4.19.2",
+    "@circle-fin/developer-controlled-wallets": "^10.6.0",
+    "@circle-fin/x402-batching": "*",
+    "@langchain/core": "*",
+    "@langchain/openai": "*",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "express": "^4.19.2",
     "node-fetch": "^3.3.2",
-    "rss-parser": "^3.13.0",
-    "@circle-fin/x402-batching": "*",
-    "@langchain/openai": "*",
-    "@langchain/core": "*"
+    "rss-parser": "^3.13.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
