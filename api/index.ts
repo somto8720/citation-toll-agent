@@ -9,7 +9,13 @@ import { getCatalogArticles, getArticleById, getStats, logCitation, getLogs, ins
 import Parser from 'rss-parser';
 import crypto from 'crypto';
 
-const parser = new Parser();
+// Configure parser with browser-like headers so Medium/Substack don't 403 us
+const parser = new Parser({
+    headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'application/rss+xml, application/xml, application/atom+xml, text/xml, */*'
+    }
+});
 
 dotenv.config();
 
@@ -102,7 +108,20 @@ app.post('/api/articles/submit', async (req, res) => {
             return res.status(400).json({ error: 'URL and Arc Wallet are required.' });
         }
 
-        const feed = await parser.parseURL(url);
+        // Auto-convert Medium profile URLs to their RSS feed URL
+        // e.g. https://medium.com/@somtouwazie -> https://medium.com/feed/@somtouwazie
+        let feedUrl = url.trim();
+        const mediumMatch = feedUrl.match(/^https?:\/\/medium\.com\/@([\w-]+)\/?$/);
+        if (mediumMatch) {
+            feedUrl = `https://medium.com/feed/@${mediumMatch[1]}`;
+        }
+        // Also handle medium.com/publication-name
+        const mediumPubMatch = feedUrl.match(/^https?:\/\/medium\.com\/([\w-]+)\/?$/);
+        if (mediumPubMatch && !feedUrl.includes('/feed/')) {
+            feedUrl = `https://medium.com/feed/${mediumPubMatch[1]}`;
+        }
+
+        const feed = await parser.parseURL(feedUrl);
         if (!feed || !feed.items || feed.items.length === 0) {
             return res.status(400).json({ error: 'Could not find any articles in that RSS feed.' });
         }
