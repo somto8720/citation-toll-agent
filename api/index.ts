@@ -7,6 +7,7 @@ import { requirePayment } from '../src/server/middleware/gateway';
 import ingestRouter from '../src/server/routes/ingest';
 import { getCatalogArticles, getArticleById, getStats, logCitation, getLogs, insertArticle } from '../src/db/queries';
 import Parser from 'rss-parser';
+import axios from 'axios';
 import crypto from 'crypto';
 
 // Configure parser with browser-like headers so Medium/Substack don't 403 us
@@ -14,8 +15,32 @@ const parser = new Parser({
     headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept': 'application/rss+xml, application/xml, application/atom+xml, text/xml, */*'
-    }
+    },
+    timeout: 8000,
 });
+
+// Fetch a feed with fallback to RSS2JSON proxy (needed on Vercel edge)
+async function fetchFeed(feedUrl: string) {
+    try {
+        return await parser.parseURL(feedUrl);
+    } catch (directError: any) {
+        console.log(`Direct fetch failed (${directError.message}), trying RSS2JSON proxy...`);
+        // Use public RSS2JSON proxy as fallback
+        const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
+        const { data } = await axios.get(proxyUrl, { timeout: 8000 });
+        if (data.status !== 'ok') throw new Error('RSS proxy also failed: ' + data.message);
+        // Map rss2json format back to rss-parser format
+        return {
+            title: data.feed?.title || '',
+            items: (data.items || []).map((item: any) => ({
+                title: item.title,
+                link: item.link,
+                content: item.content,
+                contentSnippet: item.description?.replace(/<[^>]+>/g, '').substring(0, 300)
+            }))
+        };
+    }
+}
 
 dotenv.config();
 
@@ -121,7 +146,7 @@ app.post('/api/articles/submit', async (req, res) => {
             feedUrl = `https://medium.com/feed/${mediumPubMatch[1]}`;
         }
 
-        const feed = await parser.parseURL(feedUrl);
+        const feed = await fetchFeed(feedUrl);
         if (!feed || !feed.items || feed.items.length === 0) {
             return res.status(400).json({ error: 'Could not find any articles in that RSS feed.' });
         }
