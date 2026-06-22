@@ -6,6 +6,7 @@ import { hydrateFromRSS } from '../src/attribution/rss-ingest';
 import { requirePayment } from '../src/server/middleware/gateway';
 import ingestRouter from '../src/server/routes/ingest';
 import { getCatalogArticles, getArticleById, getStats, logCitation, getLogs, insertArticle } from '../src/db/queries';
+import { hydrateDbFromKV, persistArticle } from '../src/db/kv-store';
 import Parser from 'rss-parser';
 import axios from 'axios';
 import crypto from 'crypto';
@@ -58,21 +59,24 @@ app.use((req, res, next) => {
     next();
 });
 
-// Initialize Database
+// Initialize DB + hydrate from KV (persisted publisher articles)
 initDb();
+let isHydrated = false;
+async function coldStart() {
+    await hydrateDbFromKV();  // Load persisted publisher articles first
+    await hydrateFromRSS();   // Then seed demo articles
+    isHydrated = true;
+}
 
 // Routes
 app.use('/api', ingestRouter);
-
-let isHydrated = false;
 
 // 1. Free Catalog Endpoint
 app.get('/api/catalog', async (req, res) => {
     try {
         if (!isHydrated) {
-            console.log('Performing cold-start RSS hydration...');
-            await hydrateFromRSS();
-            isHydrated = true;
+            console.log('Performing cold-start hydration...');
+            await coldStart();
         }
         const articles = getCatalogArticles();
         res.json({ success: true, articles });
@@ -158,13 +162,15 @@ app.post('/api/articles/submit', async (req, res) => {
             const sourceUrl = item.link || url;
             const stableId = 'rss_' + crypto.createHash('md5').update(sourceUrl).digest('hex').substring(0, 8);
 
-            insertArticle(
+            const newArticle = insertArticle(
                 stableId,
                 item.title || 'Untitled',
                 item.contentSnippet || item.content || 'No content snippet available.',
                 sourceUrl,
                 arc_wallet
             );
+            // Persist to KV so it survives across Vercel serverless instances
+            await persistArticle(newArticle);
             addedCount++;
         }
 
