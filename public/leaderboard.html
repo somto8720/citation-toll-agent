@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Leaderboard — Citation Toll Agent</title>
+    <meta name="description" content="Watch real USDC flow to content creators in real-time as AI agents pay for their work.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body { background-image: radial-gradient(circle at 30% 20%, hsla(217,91%,80%,.2) 0%, transparent 55%), radial-gradient(circle at 70% 80%, hsla(265,89%,80%,.15) 0%, transparent 55%); }
+        .lb-shell { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+        .lb-header { text-align: center; margin-bottom: 48px; }
+        .lb-header .logo-mark { width: 48px; height: 48px; font-size: 1.4rem; border-radius: 14px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--blue-600), var(--purple-600)); box-shadow: var(--shadow-accent); }
+        .lb-header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text); }
+        .lb-header p { color: var(--muted); margin-top: 8px; font-size: 1rem; }
+        .lb-mega { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+        .mega-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 28px 24px; text-align: center; box-shadow: var(--shadow-sm); }
+        .mega-card .mega-val { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.04em; background: linear-gradient(135deg, var(--blue-600), var(--purple-600)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .mega-card .mega-label { font-size: 0.8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 6px; }
+        .lb-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
+        .lb-section-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .lb-section-header h2 { font-size: 0.9375rem; font-weight: 700; }
+        .tx-feed { padding: 0; }
+        .tx-item { display: flex; align-items: center; gap: 14px; padding: 14px 24px; border-bottom: 1px solid var(--gray-100); animation: fadeIn .35s ease; }
+        .tx-item:last-child { border-bottom: none; }
+        .tx-avatar { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--blue-100), hsl(265,100%,95%)); display: flex; align-items: center; justify-content: center; font-size: 0.875rem; flex-shrink: 0; }
+        .tx-body { flex: 1; min-width: 0; }
+        .tx-body strong { font-size: 0.875rem; font-weight: 600; color: var(--text); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tx-body span { font-size: 0.8rem; color: var(--muted); }
+        .tx-amount { font-size: 0.9375rem; font-weight: 700; color: var(--success); white-space: nowrap; }
+        .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.875rem; font-weight: 600; color: var(--accent); text-decoration: none; margin-bottom: 28px; }
+        .back-link:hover { opacity: 0.8; }
+        .empty-lb { padding: 48px 24px; text-align: center; color: var(--muted); font-size: 0.875rem; }
+        @keyframes tick { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .tick { animation: tick .4s ease; }
+    </style>
+</head>
+<body>
+    <div class="lb-shell">
+        <a href="/" class="back-link">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Back to Dashboard
+        </a>
+
+        <div class="lb-header">
+            <div class="logo-mark">Λ</div>
+            <h1>Live USDC Leaderboard</h1>
+            <p>Real-time earnings as AI agents pay for content on Arc Testnet</p>
+        </div>
+
+        <!-- Mega Stats -->
+        <div class="lb-mega">
+            <div class="mega-card">
+                <div class="mega-val" id="lb-total-usdc">$0.000</div>
+                <div class="mega-label">Total USDC Distributed</div>
+            </div>
+            <div class="mega-card">
+                <div class="mega-val" id="lb-citations">0</div>
+                <div class="mega-label">AI Citations Intercepted</div>
+            </div>
+            <div class="mega-card">
+                <div class="mega-val" id="lb-publishers">0</div>
+                <div class="mega-label">Active Publishers</div>
+            </div>
+        </div>
+
+        <!-- Top Articles -->
+        <div class="lb-section">
+            <div class="lb-section-header">
+                <h2>Top Earning Articles</h2>
+                <span class="badge">Live</span>
+            </div>
+            <div id="lb-top-articles" class="tx-feed">
+                <div class="empty-lb">Loading top articles…</div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="lb-section">
+            <div class="lb-section-header">
+                <h2>Recent AI Purchases</h2>
+                <div class="live-chip"><span class="live-dot"></span>Streaming</div>
+            </div>
+            <div id="lb-recent-tx" class="tx-feed">
+                <div class="empty-lb">No purchases recorded yet. Run the Buyer Agent to begin.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function refreshLeaderboard() {
+            try {
+                const [statsRes, catalogRes, logsRes] = await Promise.all([
+                    fetch('/api/stats'),
+                    fetch('/api/catalog'),
+                    fetch('/api/logs'),
+                ]);
+                const stats   = await statsRes.json();
+                const catalog = await catalogRes.json();
+                const logs    = await logsRes.json();
+
+                if (stats.success) {
+                    animateVal('lb-total-usdc', '$' + stats.stats.totalEarned.toFixed(3));
+                    animateVal('lb-citations', stats.stats.citations);
+                }
+
+                if (catalog.success) {
+                    const articles = catalog.articles || [];
+                    const wallets = new Set(articles.map(a => a.creator_wallet).filter(Boolean));
+                    animateVal('lb-publishers', wallets.size);
+
+                    // Top articles by current_price (proxy for demand)
+                    const sorted = [...articles].sort((a, b) => (b.current_price || 0) - (a.current_price || 0));
+                    const topEl  = document.getElementById('lb-top-articles');
+                    if (sorted.length === 0) {
+                        topEl.innerHTML = '<div class="empty-lb">No articles yet. Register a publisher to get started.</div>';
+                    } else {
+                        topEl.innerHTML = sorted.slice(0, 5).map((a, i) => `
+                            <div class="tx-item">
+                                <div class="tx-avatar">${['🥇','🥈','🥉','4️⃣','5️⃣'][i]}</div>
+                                <div class="tx-body">
+                                    <strong>${a.title?.substring(0,60) || 'Untitled'}${a.title?.length > 60 ? '…' : ''}</strong>
+                                    <span>${a.creator_wallet?.substring(0,10)}… · Arc Testnet</span>
+                                </div>
+                                <div class="tx-amount">$${(a.current_price || 0).toFixed(4)}/read</div>
+                            </div>`).join('');
+                    }
+                }
+
+                if (logs.success) {
+                    const txEl = document.getElementById('lb-recent-tx');
+                    const purchases = logs.logs.filter(l => l.reasoning?.includes('Buyer Agent'));
+                    if (purchases.length === 0) {
+                        txEl.innerHTML = '<div class="empty-lb">No AI purchases yet. Click "Run Buyer Agent" on the dashboard.</div>';
+                    } else {
+                        txEl.innerHTML = purchases.slice(0, 8).map(p => {
+                            const priceMatch = p.reasoning?.match(/\$(\d+\.\d+)/);
+                            const price = priceMatch ? priceMatch[1] : p.new_price?.toFixed(4);
+                            return `
+                                <div class="tx-item">
+                                    <div class="tx-avatar">🤖</div>
+                                    <div class="tx-body">
+                                        <strong>${p.reasoning?.split(':')[0] || 'AI Purchase'}</strong>
+                                        <span>${new Date(p.adjusted_at).toLocaleTimeString()}</span>
+                                    </div>
+                                    <div class="tx-amount">$${price}</div>
+                                </div>`;
+                        }).join('');
+                    }
+                }
+            } catch(e) { console.error('Leaderboard refresh failed:', e); }
+        }
+
+        function animateVal(id, newVal) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (el.textContent !== String(newVal)) {
+                el.textContent = newVal;
+                el.classList.remove('tick');
+                void el.offsetWidth;
+                el.classList.add('tick');
+            }
+        }
+
+        refreshLeaderboard();
+        setInterval(refreshLeaderboard, 4000);
+    </script>
+</body>
+</html>

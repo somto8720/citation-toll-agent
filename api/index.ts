@@ -151,7 +151,8 @@ app.post('/api/articles/submit', async (req, res) => {
 
 // 4. Cron Job & Manual Settlement
 import { runPricingAgent } from '../src/agent/pricing-agent';
-import { processPayouts } from '../src/revenue/payout';
+import { processPayouts }  from '../src/revenue/payout';
+import { runBuyerAgent }   from '../src/agent/buyer-agent';
 
 app.get('/api/cron/pricing', async (req, res) => {
     if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -166,6 +167,16 @@ app.post('/api/payout/force', async (req, res) => {
     try {
         await processPayouts();
         res.json({ success: true, message: 'On-chain settlement triggered for all eligible balances.' });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 5. Buyer Agent Demo Endpoint
+app.post('/api/demo/buyer-agent', async (req, res) => {
+    try {
+        const result = await runBuyerAgent();
+        res.json({ success: true, ...result });
     } catch (e: any) {
         res.status(500).json({ error: e.message });
     }

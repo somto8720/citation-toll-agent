@@ -3,95 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Citation Toll Agent | Pro Max</title>
-    <!-- Premium UI: Inter Font -->
+    <title>Citation Toll Agent — AI Content Monetization</title>
+    <meta name="description" content="The first AI-native micro-royalty layer. Register your blog and earn USDC every time an AI agent reads your content.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="app-container">
+    <div class="app-shell">
 
         <!-- Sidebar -->
-        <aside class="glass sidebar">
-            <div class="logo">
-                <div class="lepton-coin">Λ</div>
-                <h2>Citation Agent</h2>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-mark">Λ</div>
+                <div class="logo-text">
+                    <span class="logo-name">Citation Agent</span>
+                    <span class="logo-badge">Arc Testnet</span>
+                </div>
             </div>
-            <nav>
-                <ul>
-                    <li class="active"><a href="#dashboard">Dashboard</a></li>
-                    <li><a href="#articles">Content Catalog</a></li>
-                    <li><a href="#agent-logs">Agent Intelligence</a></li>
-                </ul>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item" data-section="catalog">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+                    Content Catalog
+                </a>
+                <a href="#" class="nav-item" data-section="intelligence">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M20.188 10.934c.326.898.326 1.88 0 2.778l-1.843.46a6.95 6.95 0 0 1-.612 1.47l.934 1.553c-.573.786-1.302 1.452-2.134 1.956l-1.487-.973a6.924 6.924 0 0 1-1.591.344l-.63 1.794a7.3 7.3 0 0 1-2.65 0l-.629-1.794a6.924 6.924 0 0 1-1.591-.344l-1.487.973a7.175 7.175 0 0 1-2.134-1.956l.934-1.553a6.95 6.95 0 0 1-.612-1.47l-1.843-.46a7.094 7.094 0 0 1 0-2.778l1.843-.46c.15-.517.355-1.01.612-1.47L3.812 7.45a7.175 7.175 0 0 1 2.134-1.956l1.487.973A6.924 6.924 0 0 1 9.024 6.12l.63-1.794a7.3 7.3 0 0 1 2.65 0l.629 1.794c.555.084 1.087.22 1.591.344l1.487-.973a7.175 7.175 0 0 1 2.134 1.956l-.934 1.553c.257.46.462.953.612 1.47l1.843.46z"/></svg>
+                    Agent Intelligence
+                </a>
+                <a href="/leaderboard.html" class="nav-item" data-section="leaderboard">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                    Live Leaderboard
+                </a>
             </nav>
 
-            <!-- Publisher Sign Up Box -->
-            <div class="publisher-signup">
-                <h4>Monetize Your RSS Feed</h4>
-                <p>Register your blog to earn testnet USDC whenever an AI agent cites your work.</p>
+            <!-- Publisher Sign Up -->
+            <div class="publisher-card">
+                <div class="publisher-card-header">
+                    <div class="publisher-icon">✍️</div>
+                    <div>
+                        <h4>Monetize Your Content</h4>
+                        <p>Earn USDC when AI reads your work</p>
+                    </div>
+                </div>
                 <form id="signup-form">
-                    <input type="url" id="rss-url" class="input-field" placeholder="https://yourblog.com/rss.xml" required>
-                    <input type="text" id="arc-wallet" class="input-field" placeholder="Arc Wallet Address (0x...)" required>
-                    <button type="submit" class="btn-primary" id="signup-btn">Start Earning</button>
+                    <div class="input-group">
+                        <label for="rss-url">RSS Feed or Blog URL</label>
+                        <input type="url" id="rss-url" class="input-field" placeholder="https://medium.com/@yourname" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="arc-wallet">Arc Wallet Address</label>
+                        <input type="text" id="arc-wallet" class="input-field" placeholder="0x..." required>
+                    </div>
+                    <button type="submit" class="btn-primary" id="signup-btn">
+                        <span class="btn-text">Start Earning</span>
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
                 </form>
-                <div id="signup-status" style="font-size: 0.75rem; margin-top: 8px; color: var(--color-success); display: none;"></div>
+                <div id="signup-status"></div>
             </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="glass top-nav" id="dashboard">
-                <div class="stats-overview">
-                    <div class="stat-card">
-                        <span class="label">Total Earned (USDC)</span>
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <h3 id="total-earned" style="margin: 0;">$0.000</h3>
-                            <button id="force-settlement-btn" class="btn-primary" style="font-size: 0.75rem; padding: 4px 8px; margin-left: 10px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--color-primary); cursor: pointer; border-radius: 4px;">Force Settlement</button>
-                        </div>
+
+            <!-- Top Bar -->
+            <header class="topbar">
+                <div>
+                    <h1 id="page-title">Dashboard</h1>
+                    <p class="page-subtitle" id="page-subtitle">Live overview of your monetization activity</p>
+                </div>
+                <div class="topbar-actions">
+                    <div class="live-chip">
+                        <span class="live-dot"></span>
+                        Live
                     </div>
-                    <div class="stat-card">
-                        <span class="label">Total AI Citations</span>
-                        <h3 id="total-citations">0</h3>
-                    </div>
-                    <div class="stat-card">
-                        <span class="label"><span class="live-indicator"></span>Active Articles</span>
-                        <h3 id="active-articles">0</h3>
-                    </div>
+                    <button id="buyer-agent-btn" class="btn-outline">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-1a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v1"/></svg>
+                        Run Buyer Agent
+                    </button>
+                    <button id="force-settlement-btn" class="btn-primary-sm">
+                        Force Settlement
+                    </button>
                 </div>
             </header>
 
-            <div class="content-grid">
-                <!-- Content Catalog -->
-                <section class="glass section-container" id="articles">
-                    <h3>Content Catalog</h3>
-                    <table class="catalog-table">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Price</th>
-                                <th>Creator</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="catalog-body">
-                            <!-- Catalog items injected via JS -->
-                        </tbody>
-                    </table>
-                </section>
-
-                <!-- Agent Reasoning Log -->
-                <section class="glass section-container" id="agent-logs">
-                    <h3>Pricing Agent Intelligence</h3>
-                    <div class="log-container" id="agent-logs-container">
-                        <div style="color: var(--color-muted); font-size: 0.85rem; text-align: center; margin-top: 2rem;">
-                            Waiting for pricing signals...
+            <!-- Dashboard Section -->
+            <section id="section-dashboard" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(37,99,235,0.1); color: hsl(221,83%,53%)">
+                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        </div>
+                        <div class="stat-body">
+                            <span class="stat-label">Total Earned</span>
+                            <div class="stat-value" id="total-earned">$0.000</div>
+                            <span class="stat-change positive">USDC on Arc Testnet</span>
                         </div>
                     </div>
-                </section>
-            </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(16,185,129,0.1); color: hsl(160,84%,39%)">
+                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <div class="stat-body">
+                            <span class="stat-label">AI Citations</span>
+                            <div class="stat-value" id="total-citations">0</div>
+                            <span class="stat-change">Intercepted & charged</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(139,92,246,0.1); color: hsl(265,89%,65%)">
+                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+                        </div>
+                        <div class="stat-body">
+                            <span class="stat-label">Active Articles</span>
+                            <div class="stat-value" id="active-articles">0</div>
+                            <span class="stat-change positive"><span class="live-dot small"></span> Monetized</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(245,158,11,0.1); color: hsl(38,95%,53%)">
+                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </div>
+                        <div class="stat-body">
+                            <span class="stat-label">Publishers</span>
+                            <div class="stat-value" id="total-publishers">0</div>
+                            <span class="stat-change">Registered wallets</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agent Activity Feed -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Recent Activity</h2>
+                        <span class="badge">Live</span>
+                    </div>
+                    <div id="activity-feed" class="activity-feed">
+                        <div class="empty-state">
+                            <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" opacity=".3"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+                            <p>No activity yet. Register a publisher or run the Buyer Agent to begin.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Content Catalog Section -->
+            <section id="section-catalog" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Content Catalog</h2>
+                        <span class="badge" id="catalog-count">0 articles</span>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Article</th>
+                                    <th>Dynamic Price</th>
+                                    <th>Publisher Wallet</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="catalog-body">
+                                <tr><td colspan="4" class="empty-row">No articles registered yet. Sign up a publisher to get started.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Agent Intelligence Section -->
+            <section id="section-intelligence" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Pricing Agent Intelligence</h2>
+                        <div class="topbar-actions">
+                            <button id="run-pricing-btn" class="btn-outline" style="font-size:0.8rem; padding: 6px 12px;">
+                                Run Pricing Cycle
+                            </button>
+                        </div>
+                    </div>
+                    <div id="agent-logs-container" class="logs-feed">
+                        <div class="empty-state">
+                            <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" opacity=".3"><circle cx="12" cy="12" r="3"/><path d="M19.428 15.428a2 2 0 0 0 .002-2.858l-7.07-7.07a2 2 0 0 0-2.858 0L5.43 9.572a2 2 0 0 0 0 2.858l7.07 7.07a2 2 0 0 0 2.858 0l4.07-4.072z"/></svg>
+                            <p>Waiting for pricing signals. Run a pricing cycle or register articles to begin.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         </main>
     </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
     <script src="app.js"></script>
 </body>
 </html>

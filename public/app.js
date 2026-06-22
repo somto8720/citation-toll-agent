@@ -1,149 +1,263 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Publisher Sign-Up Form Handling
-    const signupForm = document.getElementById('signup-form');
-    const signupStatus = document.getElementById('signup-status');
+/* ── Helpers ── */
+const $ = (id) => document.getElementById(id);
+const showToast = (msg, dur = 3000) => {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), dur);
+};
 
-    if (signupForm) {
-        signupForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const url = document.getElementById('rss-url').value;
-            const wallet = document.getElementById('arc-wallet').value;
-            
-            const btn = document.getElementById('signup-btn');
-            const originalText = btn.innerText;
-            btn.innerText = 'Registering...';
-            btn.disabled = true;
+/* ── Navigation ── */
+const navItems = document.querySelectorAll('.nav-item[data-section]');
+const sections = document.querySelectorAll('.content-section');
+const titles = {
+    dashboard:    ['Dashboard', 'Live overview of your monetization activity'],
+    catalog:      ['Content Catalog', 'All monetized articles and their dynamic prices'],
+    intelligence: ['Agent Intelligence', 'Real-time pricing decisions and reasoning logs'],
+};
 
-            try {
-                const res = await fetch('/api/articles/submit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url, arc_wallet: wallet })
-                });
-                
-                const data = await res.json();
-                
-                if (data.success) {
-                    signupForm.reset();
-                    signupStatus.innerText = 'Success! Your articles are now monetized.';
-                    signupStatus.style.display = 'block';
-                    setTimeout(() => { signupStatus.style.display = 'none'; }, 5000);
-                    refreshDashboard(); // Refresh catalog immediately
-                } else {
-                    signupStatus.innerText = 'Error: ' + data.error;
-                    signupStatus.style.color = 'var(--color-danger)';
-                    signupStatus.style.display = 'block';
-                }
-            } catch (err) {
-                console.error(err);
-                signupStatus.innerText = 'Network error. Try again.';
-                signupStatus.style.color = 'var(--color-danger)';
-                signupStatus.style.display = 'block';
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
-        });
-    }
-
-    // Force Settlement Button
-    document.getElementById('force-settlement-btn')?.addEventListener('click', async (e) => {
-        const btn = e.target;
-        const originalText = btn.innerText;
-        btn.innerText = 'Settling...';
-        btn.disabled = true;
-
-        try {
-            const res = await fetch('/api/payout/force', { method: 'POST' });
-            const data = await res.json();
-            if (data.success) {
-                btn.innerText = 'Settled!';
-                btn.style.backgroundColor = 'var(--color-success)';
-                btn.style.color = 'white';
-                refreshDashboard();
-            } else {
-                throw new Error(data.error);
-            }
-        } catch (err) {
-            console.error('Force settlement failed:', err);
-            btn.innerText = 'Error';
-            btn.style.backgroundColor = 'var(--color-danger)';
-        } finally {
-            setTimeout(() => {
-                btn.innerText = originalText;
-                btn.disabled = false;
-                btn.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-                btn.style.color = 'var(--color-primary)';
-            }, 3000);
+navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+        const target = item.dataset.section;
+        if (!target || item.href?.includes('leaderboard')) return; // external links handled normally
+        e.preventDefault();
+        navItems.forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+        sections.forEach(s => s.classList.remove('active'));
+        const sec = document.getElementById(`section-${target}`);
+        if (sec) sec.classList.add('active');
+        if (titles[target]) {
+            $('page-title').textContent    = titles[target][0];
+            $('page-subtitle').textContent = titles[target][1];
         }
+        if (target === 'catalog')      refreshCatalog();
+        if (target === 'intelligence') refreshLogs();
     });
+});
 
-    // Fetch live data from backend
-    async function refreshDashboard() {
-        try {
-            // Fetch stats
-            const statsRes = await fetch('/api/stats');
-            const stats = await statsRes.json();
-            
-            // Fetch catalog
-            const catalogRes = await fetch('/api/catalog');
-            const catalog = await catalogRes.json();
+/* ── Publisher Sign-Up ── */
+const signupForm   = $('signup-form');
+const signupStatus = $('signup-status');
 
-            // Fetch Agent Reasoning Logs
-            const logsRes = await fetch('/api/logs');
-            const logs = await logsRes.json();
+signupForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const url    = $('rss-url').value.trim();
+    const wallet = $('arc-wallet').value.trim();
+    const btn    = $('signup-btn');
+    const btnText = btn.querySelector('.btn-text');
 
-            if(stats.success && catalog.success) {
-                // Update Overview Cards
-                document.getElementById('total-earned').innerText = `$${stats.stats.totalEarned.toFixed(3)}`;
-                document.getElementById('total-citations').innerText = stats.stats.citations;
-                document.getElementById('active-articles').innerText = catalog.articles.length;
+    btnText.textContent = 'Registering…';
+    btn.disabled = true;
+    signupStatus.className = '';
+    signupStatus.style.display = 'none';
 
-                // Render Catalog Table
-                const catalogBody = document.getElementById('catalog-body');
-                catalogBody.innerHTML = ''; 
-                
-                catalog.articles.forEach(item => {
-                    const row = document.createElement('tr');
-                    const link = item.source_url ? `<a href="${item.source_url}" target="_blank" style="color: var(--color-accent); font-weight: 500; text-decoration: none;">${item.title.substring(0, 50)}${item.title.length > 50 ? '...' : ''}</a>` : item.title;
-                    const walletSnippet = item.creator_wallet.substring(0,6) + '...' + item.creator_wallet.substring(item.creator_wallet.length-4);
-                    
-                    row.innerHTML = `
-                        <td>${link}</td>
-                        <td style="color: var(--color-success); font-weight: 600;">$${item.current_price.toFixed(3)}</td>
-                        <td style="color: var(--color-muted); font-family: var(--font-mono); font-size: 0.8rem;">${walletSnippet}</td>
-                        <td><span style="background: rgba(16,185,129,0.1); color: var(--color-success); padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">Active</span></td>
-                    `;
-                    catalogBody.appendChild(row);
+    try {
+        const res  = await fetch('/api/articles/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, arc_wallet: wallet }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            signupForm.reset();
+            signupStatus.textContent  = '✓ ' + data.message;
+            signupStatus.className    = 'success';
+            showToast('Publisher registered! Your articles are now monetized.');
+            refreshDashboard();
+        } else {
+            signupStatus.textContent = '✗ ' + (data.error || 'Unknown error');
+            signupStatus.className   = 'error';
+        }
+    } catch (err) {
+        signupStatus.textContent = '✗ Network error. Please try again.';
+        signupStatus.className   = 'error';
+    } finally {
+        btnText.textContent = 'Start Earning';
+        btn.disabled = false;
+    }
+});
+
+/* ── Force Settlement ── */
+$('force-settlement-btn')?.addEventListener('click', async () => {
+    const btn = $('force-settlement-btn');
+    btn.textContent = 'Settling…';
+    btn.disabled = true;
+
+    try {
+        const res  = await fetch('/api/payout/force', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+            showToast('✓ On-chain settlement triggered via Circle SDK!');
+            refreshDashboard();
+        } else {
+            showToast('Settlement error: ' + data.error);
+        }
+    } catch (err) {
+        showToast('Network error during settlement.');
+    } finally {
+        setTimeout(() => { btn.textContent = 'Force Settlement'; btn.disabled = false; }, 2000);
+    }
+});
+
+/* ── Buyer Agent ── */
+$('buyer-agent-btn')?.addEventListener('click', async () => {
+    const btn = $('buyer-agent-btn');
+    btn.textContent = 'Running…';
+    btn.disabled = true;
+    showToast('Buyer Agent is researching the catalog…', 4000);
+
+    try {
+        const res  = await fetch('/api/demo/buyer-agent', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+            showToast(`✓ Buyer Agent purchased ${data.purchased} article(s). USDC flowing!`);
+            refreshDashboard();
+            refreshLogs();
+        } else {
+            showToast('Buyer Agent error: ' + data.error);
+        }
+    } catch (err) {
+        showToast('Network error running Buyer Agent.');
+    } finally {
+        setTimeout(() => {
+            btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-1a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v1"/></svg> Run Buyer Agent';
+            btn.disabled = false;
+        }, 2500);
+    }
+});
+
+/* ── Run Pricing Cycle ── */
+$('run-pricing-btn')?.addEventListener('click', async () => {
+    const btn = $('run-pricing-btn');
+    btn.textContent = 'Running…';
+    btn.disabled = true;
+    try {
+        const res  = await fetch('/api/cron/pricing');
+        const data = await res.json();
+        if (data.success) {
+            showToast('✓ Pricing cycle complete. Logs updated.');
+            refreshLogs();
+        }
+    } catch (err) {
+        showToast('Error running pricing cycle.');
+    } finally {
+        setTimeout(() => { btn.textContent = 'Run Pricing Cycle'; btn.disabled = false; }, 2000);
+    }
+});
+
+/* ── Data Fetchers ── */
+async function refreshDashboard() {
+    try {
+        const [statsRes, catalogRes] = await Promise.all([
+            fetch('/api/stats'),
+            fetch('/api/catalog'),
+        ]);
+        const stats   = await statsRes.json();
+        const catalog = await catalogRes.json();
+
+        if (stats.success) {
+            $('total-earned').textContent   = `$${stats.stats.totalEarned.toFixed(3)}`;
+            $('total-citations').textContent = stats.stats.citations;
+        }
+        if (catalog.success) {
+            const articles = catalog.articles || [];
+            $('active-articles').textContent = articles.length;
+
+            // Count unique wallets as publishers
+            const wallets = new Set(articles.map(a => a.creator_wallet).filter(Boolean));
+            $('total-publishers').textContent = wallets.size;
+
+            // Activity feed from recent articles
+            const feed = $('activity-feed');
+            if (articles.length > 0) {
+                feed.innerHTML = '';
+                articles.slice(0, 6).forEach(a => {
+                    const el = document.createElement('div');
+                    el.className = 'activity-item';
+                    el.innerHTML = `
+                        <div class="activity-dot green"></div>
+                        <div class="activity-body">
+                            <strong>${a.title?.substring(0, 60) || 'Untitled'}${(a.title?.length > 60) ? '…' : ''}</strong>
+                            <span>Monetized at <strong style="color:var(--success)">$${a.current_price?.toFixed(4) || '0.0010'}</strong> per AI read · ${a.creator_wallet?.substring(0,8)}…</span>
+                        </div>`;
+                    feed.appendChild(el);
                 });
             }
 
-            if (logs.success) {
-                const logsContainer = document.getElementById('agent-logs-container');
-                if (logs.logs.length === 0) {
-                    logsContainer.innerHTML = '<div style="color: var(--color-muted); font-size: 0.85rem; text-align: center; margin-top: 2rem;">Waiting for pricing signals...</div>';
-                } else {
-                    logsContainer.innerHTML = '';
-                    logs.logs.slice(0, 10).forEach(log => {
-                        const entry = document.createElement('div');
-                        const isIncrease = log.new_price > log.old_price;
-                        entry.className = 'log-entry';
-                        if (!isIncrease) entry.style.borderLeftColor = 'var(--color-danger)';
-                        
-                        entry.innerHTML = `
-                            <strong>Price ${isIncrease ? 'Increased' : 'Decreased'} to $${log.new_price.toFixed(3)}</strong>
-                            <span class="reason">"${log.reasoning}"</span>
-                        `;
-                        logsContainer.appendChild(entry);
-                    });
-                }
-            }
-        } catch(e) {
-            console.error('Failed to fetch live data:', e);
+            // Badge count on catalog nav
+            $('catalog-count').textContent = `${articles.length} article${articles.length !== 1 ? 's' : ''}`;
         }
+    } catch (e) {
+        console.error('Dashboard refresh failed:', e);
     }
+}
 
-    // Initial fetch and poll
-    refreshDashboard();
-    setInterval(refreshDashboard, 5000);
-});
+async function refreshCatalog() {
+    try {
+        const res     = await fetch('/api/catalog');
+        const catalog = await res.json();
+        const tbody   = $('catalog-body');
+
+        if (!catalog.success || catalog.articles.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="empty-row">No articles registered yet. Sign up a publisher to get started.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        catalog.articles.forEach(a => {
+            const wallet = a.creator_wallet;
+            const shortW = wallet ? `${wallet.substring(0,6)}…${wallet.substring(wallet.length-4)}` : '—';
+            const link   = a.source_url
+                ? `<a href="${a.source_url}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600;text-decoration:none;">${(a.title||'Untitled').substring(0,55)}${a.title?.length>55?'…':''}</a>`
+                : (a.title || 'Untitled').substring(0, 55);
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${link}</td>
+                <td><span class="price-pill">$${(a.current_price||0.001).toFixed(4)}</span></td>
+                <td><span class="wallet-mono">${shortW}</span></td>
+                <td><span class="status-pill"><span class="live-dot small"></span>Active</span></td>`;
+            tbody.appendChild(tr);
+        });
+    } catch (e) {
+        console.error('Catalog refresh failed:', e);
+    }
+}
+
+async function refreshLogs() {
+    try {
+        const res  = await fetch('/api/logs');
+        const data = await res.json();
+        const container = $('agent-logs-container');
+
+        if (!data.success || data.logs.length === 0) {
+            container.innerHTML = `<div class="empty-state">
+                <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" opacity=".3"><circle cx="12" cy="12" r="3"/><path d="M19.428 15.428a2 2 0 0 0 .002-2.858l-7.07-7.07a2 2 0 0 0-2.858 0L5.43 9.572a2 2 0 0 0 0 2.858l7.07 7.07a2 2 0 0 0 2.858 0l4.07-4.072z"/></svg>
+                <p>No pricing events yet. Register articles and run a pricing cycle.</p>
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = '';
+        data.logs.slice(0, 15).forEach(log => {
+            const isUp   = log.new_price > log.old_price;
+            const isBuyer = log.reasoning?.toLowerCase().includes('buyer');
+            const el = document.createElement('div');
+            el.className = `log-item ${isBuyer ? 'buyer' : (isUp ? 'increase' : 'decrease')}`;
+            el.innerHTML = `
+                <div class="log-icon">${isBuyer ? '🤖' : (isUp ? '📈' : '📉')}</div>
+                <div class="log-body">
+                    <strong>${isBuyer ? 'Buyer Agent Purchase' : ('Price ' + (isUp ? 'Raised' : 'Lowered') + ' → $' + log.new_price?.toFixed(4))}</strong>
+                    <span>"${log.reasoning}"</span>
+                </div>`;
+            container.appendChild(el);
+        });
+    } catch (e) {
+        console.error('Logs refresh failed:', e);
+    }
+}
+
+/* ── Auto-Poll ── */
+refreshDashboard();
+setInterval(refreshDashboard, 6000);

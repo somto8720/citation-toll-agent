@@ -7,6 +7,7 @@ export function getCatalogArticles() {
         preview: a.preview,
         source_url: a.source_url,
         current_price: a.current_price,
+        creator_wallet: a.creator_wallet,
         created_at: a.created_at
     }));
 }
