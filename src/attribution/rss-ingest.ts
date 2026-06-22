@@ -44,6 +44,9 @@ export async function hydrateFromRSS() {
                     // Base price between 0.005 and 0.020 USDC
                     const randomBasePrice = Math.max(0.005, parseFloat((Math.random() * 0.02).toFixed(3)));
 
+                    const d = new Date();
+                    d.setDate(d.getDate() - 5); // Make demo articles 5 days old so user articles appear first
+
                     dbStore.articles.push({
                         id: stableId,
                         title: item.title || 'Untitled',
@@ -52,7 +55,7 @@ export async function hydrateFromRSS() {
                         creator_wallet: randomWallet,
                         current_price: randomBasePrice,
                         base_price: randomBasePrice,
-                        created_at: item.isoDate || new Date().toISOString()
+                        created_at: d.toISOString()
                     });
                     addedCount++;
                 }

@@ -50,6 +50,13 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+    // Disable all caching for API endpoints
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+});
 
 // Disable caching for all endpoints so live dashboard updates aren't frozen by Vercel CDN
 app.use((req, res, next) => {
@@ -77,6 +84,9 @@ app.get('/api/catalog', async (req, res) => {
         if (!isHydrated) {
             console.log('Performing cold-start hydration...');
             await coldStart();
+        } else {
+            // If already hot, sync any new articles added by other Vercel instances
+            await hydrateDbFromKV();
         }
         const articles = getCatalogArticles();
         res.json({ success: true, articles });

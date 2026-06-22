@@ -9,7 +9,7 @@ export function getCatalogArticles() {
         current_price: a.current_price,
         creator_wallet: a.creator_wallet,
         created_at: a.created_at
-    }));
+    })).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 }
 
 export function getArticleById(id: string) {
@@ -45,14 +45,17 @@ export function logCitation(articleId: string, consumerFingerprint: string, cons
     return Date.now();
 }
 
-export function insertArticle(id: string, title: string, content: string, sourceUrl: string, creatorWallet: string) {
+export function insertArticle(id: string, title: string, content: string, sourceUrl: string, creatorWallet: string, pastDays: number = 0) {
     const preview = content.length > 200 ? content.substring(0, 200) + '...' : content;
     const randomBasePrice = Math.max(0.005, parseFloat((Math.random() * 0.02).toFixed(3)));
     
+    const d = new Date();
+    d.setDate(d.getDate() - pastDays);
+
     const newArticle = {
         id, title, content, preview, source_url: sourceUrl, creator_wallet: creatorWallet,
         current_price: randomBasePrice, min_price: 0.001, max_price: 0.05, base_price: randomBasePrice,
-        created_at: new Date().toISOString()
+        created_at: d.toISOString()
     };
     dbStore.articles.push(newArticle);
     return newArticle;
