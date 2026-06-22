@@ -101,30 +101,47 @@ $('force-settlement-btn')?.addEventListener('click', async () => {
 });
 
 /* ── Buyer Agent ── */
+let buyerAgentInterval = null;
+
 $('buyer-agent-btn')?.addEventListener('click', async () => {
     const btn = $('buyer-agent-btn');
-    btn.textContent = 'Running…';
-    btn.disabled = true;
-    showToast('Buyer Agent is researching the catalog…', 4000);
-
-    try {
-        const res  = await fetch('/api/demo/buyer-agent', { method: 'POST' });
-        const data = await res.json();
-        if (data.success) {
-            showToast(`✓ Buyer Agent purchased ${data.purchased} article(s). USDC flowing!`);
-            refreshDashboard();
-            refreshLogs();
-        } else {
-            showToast('Buyer Agent error: ' + data.error);
-        }
-    } catch (err) {
-        showToast('Network error running Buyer Agent.');
-    } finally {
-        setTimeout(() => {
-            btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-1a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v1"/></svg> Run Buyer Agent';
-            btn.disabled = false;
-        }, 2500);
+    
+    if (buyerAgentInterval) {
+        // Stop the agent
+        clearInterval(buyerAgentInterval);
+        buyerAgentInterval = null;
+        btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-1a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v1"/></svg> Run Buyer Agent';
+        btn.style.background = '';
+        btn.style.color = '';
+        showToast('Buyer Agent stopped.');
+        return;
     }
+
+    // Start the agent
+    btn.innerHTML = '🛑 Stop Buyer Agent';
+    btn.style.background = 'var(--danger, #ff4444)';
+    btn.style.color = 'white';
+    showToast('Buyer Agent activated! Simulating continuous enterprise traffic...');
+
+    async function runAgent() {
+        try {
+            const res  = await fetch('/api/demo/buyer-agent', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                showToast(`✓ Buyer Agent purchased ${data.purchased} article(s). USDC flowing!`);
+                refreshDashboard();
+                refreshLogs();
+            } else {
+                console.error('Buyer Agent error:', data.error);
+            }
+        } catch (err) {
+            console.error('Network error running Buyer Agent.', err);
+        }
+    }
+
+    // Run immediately, then every 8 seconds
+    runAgent();
+    buyerAgentInterval = setInterval(runAgent, 8000);
 });
 
 /* ── Run Pricing Cycle ── */
