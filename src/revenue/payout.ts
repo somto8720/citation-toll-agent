@@ -39,7 +39,7 @@ export async function processPayouts() {
                     walletId: process.env.AGENT_WALLET_ID || '',
                     tokenId: process.env.USDC_TOKEN_ID || '',
                     destinationAddress: wallet,
-                    amounts: [total_unpaid.toString()],
+                    amount: [total_unpaid.toString()],
                     fee: {
                         type: 'level',
                         config: {
@@ -65,6 +65,11 @@ export async function processPayouts() {
 
             } catch (e: any) {
                 console.error(`Failed to send payout to ${wallet}:`, e.message);
+                if (e.response?.data) {
+                    console.error('Circle SDK Error details:', e.response.data);
+                    throw new Error(`Circle API Error: ${JSON.stringify(e.response.data)}`);
+                }
+                throw e;
             }
     }
 }
