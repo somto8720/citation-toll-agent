@@ -71,7 +71,7 @@ initDb();
 let isHydrated = false;
 async function coldStart() {
     await hydrateDbFromKV();  // Load persisted publisher articles first
-    await hydrateFromRSS();   // Then seed demo articles
+    // Note: Dummy data seeding via hydrateFromRSS() is disabled for production
     isHydrated = true;
 }
 
