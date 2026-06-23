@@ -82,8 +82,7 @@ body {
 /* ── Layout ── */
 .app-shell {
   display: flex;
-  height: 100vh;
-  overflow: hidden; /* desktop: sidebar + main side by side, no outer scroll */
+  min-height: 100vh;
 }
 
 /* ── Sidebar ── */
@@ -97,6 +96,9 @@ body {
   padding: 20px 16px;
   overflow-y: auto;
   gap: 8px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
 }
 
 .sidebar-logo {
@@ -309,18 +311,17 @@ body {
   display: block;
 }
 
-/* ── Main Content ── */
+/* ✨ Main Content ✨ */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
   min-width: 0;
-  overflow: hidden; /* fixed on desktop, content-section scrolls */
   background: var(--bg);
 }
 
-/* ── Top Bar ── */
+/* ✨ Top Bar ✨ */
 .topbar {
   height: var(--topbar-h);
   padding: 0 28px;
@@ -328,7 +329,12 @@ body {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  background: rgba(250, 250, 250, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
   flex-shrink: 0;
   gap: 16px;
 }
@@ -422,21 +428,18 @@ body {
   border-color: hsla(221,83%,53%,.4);
 }
 
-/* ── Content Sections ── */
+/* ✨ Content Sections ✨ */
 .content-section {
   display: none;
   flex: 1;
   min-height: 0; /* Required to allow scrolling in flex column */
   padding: 24px 28px;
-  overflow-y: auto;
   flex-direction: column;
   gap: 20px;
 }
 
 .content-section.active {
   display: flex;
-  overflow-y: auto; /* each section scrolls independently */
-  -webkit-overflow-scrolling: touch;
 }
 
 
@@ -872,11 +875,9 @@ body {
     transform: translateX(0);
   }
 
-  /* App shell: full height, column layout, scrollable */
+  /* App shell stops being flex side-by-side */
   .app-shell {
     flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
   }
 
   /* Main content: fills remaining space, content-section handles scrolling */
@@ -884,7 +885,6 @@ body {
     width: 100%;
     flex: 1;
     min-height: 0; 
-    overflow: hidden;
   }
 
   /* Content sections inherit scrolling from desktop base styles */
