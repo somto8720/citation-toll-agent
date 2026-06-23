@@ -147,22 +147,115 @@ app.post('/api/articles/submit', async (req, res) => {
             return res.status(400).json({ error: 'URL and Arc Wallet are required.' });
         }
 
-        // Auto-convert Medium profile URLs to their RSS feed URL
-        // e.g. https://medium.com/@somtouwazie -> https://medium.com/feed/@somtouwazie
         let feedUrl = url.trim();
-        const mediumMatch = feedUrl.match(/^https?:\/\/medium\.com\/@([\w-]+)\/?$/);
-        if (mediumMatch) {
-            feedUrl = `https://medium.com/feed/@${mediumMatch[1]}`;
-        }
-        // Also handle medium.com/publication-name
-        const mediumPubMatch = feedUrl.match(/^https?:\/\/medium\.com\/([\w-]+)\/?$/);
-        if (mediumPubMatch && !feedUrl.includes('/feed/')) {
-            feedUrl = `https://medium.com/feed/${mediumPubMatch[1]}`;
+
+        // ── Universal Blog Platform RSS Resolver ──────────────────────────────
+        // Converts any known blog URL into its canonical RSS feed URL.
+
+        // 1. Medium profile: medium.com/@username
+        const mediumProfile = feedUrl.match(/^https?:\/\/medium\.com\/@([\w-]+)\/?$/);
+        if (mediumProfile) {
+            feedUrl = `https://medium.com/feed/@${mediumProfile[1]}`;
         }
 
-        const feed = await fetchFeed(feedUrl);
+        // 2. Medium publication: medium.com/publication-name
+        const mediumPub = feedUrl.match(/^https?:\/\/medium\.com\/([\w-]+)\/?$/);
+        if (mediumPub && !feedUrl.includes('/feed/')) {
+            feedUrl = `https://medium.com/feed/${mediumPub[1]}`;
+        }
+
+        // 3. Substack: username.substack.com  OR  substack.com/@username
+        const substackSub = feedUrl.match(/^https?:\/\/([\w-]+)\.substack\.com\/?$/);
+        if (substackSub) {
+            feedUrl = `https://${substackSub[1]}.substack.com/feed`;
+        }
+        const substackAt = feedUrl.match(/^https?:\/\/substack\.com\/@([\w-]+)\/?$/);
+        if (substackAt) {
+            feedUrl = `https://${substackAt[1]}.substack.com/feed`;
+        }
+
+        // 4. WordPress.com: username.wordpress.com
+        const wpCom = feedUrl.match(/^https?:\/\/([\w-]+)\.wordpress\.com\/?$/);
+        if (wpCom) {
+            feedUrl = `https://${wpCom[1]}.wordpress.com/feed/`;
+        }
+
+        // 5. Self-hosted WordPress / generic blog: append /feed if not already an RSS URL
+        //    (heuristic: if the URL is a homepage and has no known feed extension)
+        const isBareHomepage = !feedUrl.match(/\.(xml|rss|atom|json)(\?.*)?$/i) && !feedUrl.includes('/feed');
+        if (isBareHomepage) {
+            // Try WordPress-style /feed first — most common for self-hosted blogs
+            feedUrl = feedUrl.replace(/\/?$/, '/feed');
+        }
+
+        // 6. Ghost blogs: ghost.io or self-hosted — they use /rss/
+        const ghostIo = feedUrl.match(/^https?:\/\/([\w-]+)\.ghost\.io\/?$/);
+        if (ghostIo) {
+            feedUrl = `https://${ghostIo[1]}.ghost.io/rss/`;
+        }
+
+        // 7. Blogger / blogspot: username.blogspot.com
+        const blogspot = feedUrl.match(/^https?:\/\/([\w-]+)\.blogspot\.com\/?$/);
+        if (blogspot) {
+            feedUrl = `https://${blogspot[1]}.blogspot.com/feeds/posts/default?alt=rss`;
+        }
+
+        // 8. Hashnode: hashnode.dev or custom domain
+        const hashnode = feedUrl.match(/^https?:\/\/([\w-]+)\.hashnode\.dev\/?$/);
+        if (hashnode) {
+            feedUrl = `https://${hashnode[1]}.hashnode.dev/rss.xml`;
+        }
+
+        // 9. Beehiiv: username.beehiiv.com
+        const beehiiv = feedUrl.match(/^https?:\/\/([\w-]+)\.beehiiv\.com\/?$/);
+        if (beehiiv) {
+            feedUrl = `https://${beehiiv[1]}.beehiiv.com/feed`;
+        }
+
+        // 10. Dev.to: dev.to/username
+        const devTo = feedUrl.match(/^https?:\/\/dev\.to\/([\w-]+)\/?$/);
+        if (devTo) {
+            feedUrl = `https://dev.to/feed/${devTo[1]}`;
+        }
+
+        // 11. If URL already looks like a direct RSS/Atom/XML feed, use it as-is
+        const isDirectFeed = feedUrl.match(/\.(xml|rss|atom)(\?.*)?$/i) || feedUrl.includes('/feed') || feedUrl.includes('/rss');
+        if (isDirectFeed) {
+            // Already a feed URL — use directly
+        } else {
+            // Final fallback: try to fetch the HTML page and autodiscover the RSS link tag
+            try {
+                const { data: html } = await axios.get(feedUrl, {
+                    timeout: 5000,
+                    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CitationTollAgent/1.0; +https://citation-toll-agent.vercel.app)' }
+                });
+                const rssLinkMatch = html.match(/<link[^>]+type="application\/(rss|atom)\+xml"[^>]+href="([^"]+)"/i)
+                                  || html.match(/<link[^>]+href="([^"]+)"[^>]+type="application\/(rss|atom)\+xml"/i);
+                if (rssLinkMatch) {
+                    const discovered = rssLinkMatch[2] || rssLinkMatch[1];
+                    // Resolve relative URLs
+                    feedUrl = discovered.startsWith('http') ? discovered : new URL(discovered, url).href;
+                    console.log(`[RSS Autodiscover] Found feed at: ${feedUrl}`);
+                }
+            } catch (autodiscoverErr: any) {
+                console.log(`[RSS Autodiscover] Could not autodiscover feed: ${autodiscoverErr.message}`);
+            }
+        }
+        // ────────────────────────────────────────────────────────────────────
+
+        console.log(`[Submit] Resolved feed URL: ${feedUrl}`);
+
+        let feed;
+        try {
+            feed = await fetchFeed(feedUrl);
+        } catch (feedErr: any) {
+            return res.status(400).json({
+                error: `Could not fetch RSS feed from "${feedUrl}". Make sure your blog has an RSS feed enabled. Tip: try pasting the direct RSS URL (e.g. yourblog.com/feed or yourblog.com/rss.xml).`
+            });
+        }
+
         if (!feed || !feed.items || feed.items.length === 0) {
-            return res.status(400).json({ error: 'Could not find any articles in that RSS feed.' });
+            return res.status(400).json({ error: 'Found the RSS feed but it contains no articles yet.' });
         }
 
         // Ingest up to 5 articles to populate the catalog
