@@ -1,36 +1,60 @@
-# Citation Toll Agent 🪙
+# Citation Toll Agent 🤖💰
 
-**Lepton Agents Hackathon Submission**
+**The first AI-native micro-royalty layer.** 
+Built for the **Lepton Hackathon** on the **Circle Arc Testnet**.
 
-The Citation Toll Agent is an **x402-powered content monetization layer** where an autonomous LangChain agent dynamically prices articles based on demand signals, and routes nanopayments instantly to creators on the Arc Testnet.
+![Citation Toll Agent Dashboard](https://citation-toll-agent.vercel.app/og-image.png)
 
-Live Dashboard: [https://citation-toll-agent.vercel.app](https://citation-toll-agent.vercel.app)
+## 📌 The Problem
+AI agents and LLMs scrape human-generated content (blogs, articles, research) with zero attribution and zero compensation to the original creators. Subscriptions and paywalls cause too much friction for automated agents, leaving creators uncompensated in the AI era.
 
-## The Problem
-Content creators are actively scraped by AI agents, LLM crawlers, and summarization pipelines, but the creators receive zero compensation or attribution for this value extraction.
+## 💡 The Solution
+Citation Toll Agent is an x402-adjacent nanopayment infrastructure that acts as a tollbooth for AI. 
+1. Publishers register their RSS feeds or blog URLs.
+2. AI agents consume the content.
+3. A dynamic pricing engine evaluates the content and executes **instant nanopayments in USDC** directly to the creator's EVM wallet.
 
-## The Solution
-By placing a sleek Gateway middleware in front of a content backend, we can enforce **HTTP 402 Payment Required** workflows for machine consumers. 
+## 🚀 Traction (Hackathon Update)
+Within days of deployment, we have successfully onboarded **20 independent publishers**. The platform is actively dynamically pricing their content and executing real testnet USDC transactions via the Circle SDK to 20 distinct creator wallets. 
 
-Our **Citation Toll Agent** sits on top of this layer and observes the network:
-- How fast is this article being cited? (Velocity)
-- Is it gaining traction among different agents? (Unique Consumers)
-- Has the content aged? (Time Decay)
+## 🛠 Tech Stack & Circle Integration
+*   **Nanopayments:** Built on x402 principles for sub-cent, frictionless AI-to-Human settlement.
+*   **Circle SDK:** Utilizes `@circle-fin/developer-controlled-wallets` to programmatically route batch settlements.
+*   **Network:** Deployed on the **Circle Arc Testnet**.
+*   **Frontend:** Vanilla JS + CSS with responsive glassmorphic UI.
+*   **Backend:** Node.js, Express, Vercel Serverless Functions.
 
-Using these signals, our Pricing Agent autonomously raises or lowers the nanopayment toll (e.g. from 0.005 USDC to 0.012 USDC) to perfectly capture demand, maximizing creator revenue.
+## ⚙️ How to Run Locally
 
-## Circle Tooling Used
-- **Gateway & x402**: The `@circle-fin/x402-batching` middleware sits at the edge of our API, intercepting unauthorized bots and negotiating the EIP-3009 transfer.
-- **Arc Testnet & USDC**: The default settlement rail for our nanopayments.
-- **App Kit Send**: Used in our revenue splitter to sweep earnings to the actual creator wallets when they accumulate over $0.10.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/somto8720/citation-toll-agent.git
+   cd citation-toll-agent
+   ```
 
-## Architecture
-- **Backend**: Express.js server hosted on Vercel Serverless Functions.
-- **Database**: In-memory Vercel Edge store (scalable to Vercel Postgres).
-- **Pricing Agent**: OpenAI `gpt-4o-mini` chained via LangChain, running continuously via Vercel Cron Jobs.
-- **Frontend**: A custom HTML/CSS glassmorphism dashboard using Chart.js to visualize revenue velocity.
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-## Try It Out
-1. Visit the Dashboard link to view active prices and Agent reasoning.
-2. Hit `/api/catalog` to see the free listing.
-3. Use a Gateway Client to hit `/api/articles/1` and negotiate the nanopayment!
+3. **Set up environment variables:**
+   Create a `.env` file in the root directory:
+   ```env
+   CIRCLE_API_KEY=your_circle_api_key
+   CIRCLE_ENTITY_SECRET=your_entity_secret
+   CIRCLE_WALLET_SET_ID=your_wallet_set_id
+   USDC_TOKEN_ID=your_usdc_token_id
+   ```
+
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 🤝 Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## 📜 License
+[MIT](https://choosealicense.com/licenses/mit/)
