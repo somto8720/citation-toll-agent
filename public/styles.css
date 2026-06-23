@@ -314,8 +314,7 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto; /* scrollable on desktop */
-  overflow-x: hidden;
+  overflow: hidden; /* fixed on desktop, content-section scrolls */
   background: var(--bg);
 }
 
