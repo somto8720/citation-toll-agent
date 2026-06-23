@@ -20,6 +20,8 @@
                     <span class="logo-name">Citation Agent</span>
                     <span class="logo-badge">Arc Testnet</span>
                 </div>
+                <!-- Mobile close button -->
+                <button class="sidebar-close" id="sidebar-close-btn" aria-label="Close menu">✕</button>
             </div>
 
             <nav class="sidebar-nav">
@@ -73,9 +75,15 @@
 
             <!-- Top Bar -->
             <header class="topbar">
-                <div>
-                    <h1 id="page-title">Dashboard</h1>
-                    <p class="page-subtitle" id="page-subtitle">Live overview of your monetization activity</p>
+                <div class="topbar-left">
+                    <!-- Hamburger (mobile only) -->
+                    <button class="hamburger" id="hamburger-btn" aria-label="Open menu">
+                        <span></span><span></span><span></span>
+                    </button>
+                    <div>
+                        <h1 id="page-title">Dashboard</h1>
+                        <p class="page-subtitle" id="page-subtitle">Live overview of your monetization activity</p>
+                    </div>
                 </div>
                 <div class="topbar-actions">
                     <div class="live-chip">
@@ -84,10 +92,11 @@
                     </div>
                     <button id="buyer-agent-btn" class="btn-outline">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-1a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v1"/></svg>
-                        Run Buyer Agent
+                        <span class="btn-label">Run Buyer Agent</span>
                     </button>
                     <button id="force-settlement-btn" class="btn-primary-sm">
-                        Force Settlement
+                        <span class="btn-label">Force Settlement</span>
+                        <span class="btn-label-short">Settle</span>
                     </button>
                 </div>
             </header>
@@ -199,6 +208,9 @@
 
         </main>
     </div>
+
+    <!-- Mobile sidebar overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
     <!-- Toast -->
     <div id="toast" class="toast"></div>

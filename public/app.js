@@ -7,6 +7,27 @@ const showToast = (msg, dur = 3000) => {
     setTimeout(() => t.classList.remove('show'), dur);
 };
 
+/* ── Mobile Sidebar Toggle ── */
+const sidebar        = $('sidebar');
+const overlay        = $('sidebar-overlay');
+const hamburgerBtn   = $('hamburger-btn');
+const sidebarCloseBtn = $('sidebar-close-btn');
+
+function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden'; // prevent background scroll
+}
+function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+hamburgerBtn?.addEventListener('click', openSidebar);
+sidebarCloseBtn?.addEventListener('click', closeSidebar);
+overlay?.addEventListener('click', closeSidebar);
+
 /* ── Navigation ── */
 const navItems = document.querySelectorAll('.nav-item[data-section]');
 const sections = document.querySelectorAll('.content-section');
@@ -32,6 +53,8 @@ navItems.forEach(item => {
         }
         if (target === 'catalog')      refreshCatalog();
         if (target === 'intelligence') refreshLogs();
+        // Auto-close sidebar on mobile after navigation
+        closeSidebar();
     });
 });
 

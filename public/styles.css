@@ -759,3 +759,231 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+/* ─────────────────────────────────────────
+   MOBILE RESPONSIVENESS
+   Breakpoints: 768px (tablet), 480px (phone)
+───────────────────────────────────────── */
+
+/* ── Hamburger Button (hidden on desktop) ── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 6px;
+  transition: background 120ms ease;
+}
+.hamburger:hover { background: var(--gray-100); }
+.hamburger span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--gray-600);
+  border-radius: 2px;
+  transition: all 200ms ease;
+}
+
+/* ── Sidebar Close Button (hidden on desktop) ── */
+.sidebar-close {
+  display: none;
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  line-height: 1;
+  transition: color 120ms ease;
+}
+.sidebar-close:hover { color: var(--text); }
+
+/* ── Sidebar Overlay (mobile backdrop) ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+.sidebar-overlay.active {
+  opacity: 1;
+}
+
+/* ── Topbar Left ── */
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── btn-label-short (hidden on desktop, shown on mobile) ── */
+.btn-label-short { display: none; }
+
+/* ── Tablet (≤ 900px): shrink sidebar ── */
+@media (max-width: 900px) {
+  :root { --sidebar-w: 240px; }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Mobile (≤ 768px): slide-over sidebar ── */
+@media (max-width: 768px) {
+  /* Show hamburger & close button */
+  .hamburger       { display: flex; }
+  .sidebar-close   { display: block; }
+  .sidebar-overlay { display: block; }
+
+  /* Sidebar becomes fixed slide-over panel */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: min(var(--sidebar-w), 85vw);
+    z-index: 100;
+    transform: translateX(-110%);
+    transition: transform 240ms cubic-bezier(.4,0,.2,1);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Open state toggled by JS */
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Main content takes full width */
+  .main-content {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  /* App shell stops being flex side-by-side */
+  .app-shell {
+    flex-direction: column;
+  }
+
+  /* Topbar stacks nicely */
+  .topbar {
+    padding: 0 14px;
+    height: auto;
+    min-height: var(--topbar-h);
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  /* Hide full-text button labels, show short versions */
+  .btn-label       { display: none; }
+  .btn-label-short { display: inline; }
+
+  /* Stats go 2-column on tablet-ish mobile */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  /* Publisher card goes to bottom of sidebar (normal flow on mobile) */
+  .publisher-card {
+    margin-top: 16px;
+  }
+
+  /* Content padding reduced */
+  .main-content {
+    padding: 0;
+  }
+
+  .content-section {
+    padding: 14px;
+  }
+
+  /* Table: hide less important columns */
+  .data-table th:nth-child(3),
+  .data-table td:nth-child(3) {
+    display: none;
+  }
+
+  /* Make table scrollable horizontally */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ── Small Phone (≤ 480px) ── */
+@media (max-width: 480px) {
+  /* Single column stats */
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Topbar actions stack below title */
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .topbar-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* Table: hide status column too, keep title + price */
+  .data-table th:nth-child(4),
+  .data-table td:nth-child(4) {
+    display: none;
+  }
+
+  /* Bigger touch targets */
+  .nav-item {
+    padding: 12px 14px;
+    font-size: 0.9375rem;
+  }
+
+  .btn-primary,
+  .btn-outline,
+  .btn-primary-sm {
+    min-height: 42px;
+  }
+
+  /* Reduce page padding */
+  .content-section {
+    padding: 10px;
+  }
+
+  /* Input fields full width */
+  .input-field {
+    font-size: 16px; /* prevents iOS zoom on focus */
+  }
+
+  /* Card padding reduced */
+  .card {
+    padding: 14px;
+    border-radius: var(--r-md);
+  }
+
+  /* Stat card layout tweak */
+  .stat-card {
+    padding: 14px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
