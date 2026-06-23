@@ -15,7 +15,7 @@ Citation Toll Agent is an x402-adjacent nanopayment infrastructure that acts as 
 3. A dynamic pricing engine evaluates the content and executes **instant nanopayments in USDC** directly to the creator's EVM wallet.
 
 ## 🚀 Traction (Hackathon Update)
-Within days of deployment, we have successfully onboarded **20 independent publishers**. The platform is actively dynamically pricing their content and executing real testnet USDC transactions via the Circle SDK to 20 distinct creator wallets. 
+Within days of deployment, we have successfully onboarded **10 independent publishers**. The platform is actively dynamically pricing their content and executing real testnet USDC transactions via the Circle SDK to 10 distinct creator wallets. 
 
 ## 🛠 Tech Stack & Circle Integration
 *   **Nanopayments:** Built on x402 principles for sub-cent, frictionless AI-to-Human settlement.
