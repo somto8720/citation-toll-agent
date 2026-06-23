@@ -14,13 +14,13 @@ const hamburgerBtn   = $('hamburger-btn');
 const sidebarCloseBtn = $('sidebar-close-btn');
 
 function openSidebar() {
-    sidebar.classList.add('open');
-    overlay.classList.add('active');
+    sidebar?.classList.add('open');
+    overlay?.classList.add('active');
     document.body.style.overflow = 'hidden'; // prevent background scroll
 }
 function closeSidebar() {
-    sidebar.classList.remove('open');
-    overlay.classList.remove('active');
+    sidebar?.classList.remove('open');
+    overlay?.classList.remove('active');
     document.body.style.overflow = '';
 }
 
