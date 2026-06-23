@@ -39,7 +39,7 @@ export async function processPayouts() {
                     walletId: process.env.AGENT_WALLET_ID || '',
                     tokenId: process.env.USDC_TOKEN_ID || '',
                     destinationAddress: wallet,
-                    amount: [total_unpaid.toString()],
+                    amounts: [total_unpaid.toString()],
                     fee: {
                         type: 'level',
                         config: {
