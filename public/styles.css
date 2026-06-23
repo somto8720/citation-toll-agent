@@ -877,21 +877,17 @@ body {
     overflow: hidden;
   }
 
-  /* Main content: fills remaining space and scrolls */
+  /* Main content: fills remaining space, content-section handles scrolling */
   .main-content {
     width: 100%;
     flex: 1;
-    min-height: 0; /* Required to allow scrolling in flex column */
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
+    min-height: 0; 
+    overflow: hidden;
   }
 
-  /* Content sections: normal flow, no fixed height */
+  /* Content sections inherit scrolling from desktop base styles */
   .content-section {
-    overflow-y: visible;
     padding: 14px;
-    flex-direction: column;
     gap: 14px;
   }
 
