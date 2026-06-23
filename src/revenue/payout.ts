@@ -1,4 +1,5 @@
 import { dbStore } from '../db/schema';
+import { persistStore } from '../db/kv-store';
 import { initiateDeveloperControlledWalletsClient } from '@circle-fin/developer-controlled-wallets';
 import dotenv from 'dotenv';
 
@@ -65,6 +66,8 @@ export async function processPayouts() {
                     e.payout_tx_hash = txHash;
                 }
             }
+            
+            persistStore();
 
         } catch (e: any) {
             console.error(`Failed to send payout to ${wallet}:`, e.message);

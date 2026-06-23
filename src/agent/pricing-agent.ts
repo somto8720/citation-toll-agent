@@ -2,6 +2,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { dbStore } from '../db/schema';
 import { updateArticlePrice } from '../db/queries';
+import { persistStore } from '../db/kv-store';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -104,6 +105,8 @@ export async function runPricingAgent() {
                     signals: JSON.stringify(inputs),
                     adjusted_at: new Date().toISOString()
                 });
+
+                persistStore();
             }
 
         } catch (e: any) {

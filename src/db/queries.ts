@@ -1,4 +1,5 @@
 import { dbStore } from './schema';
+import { persistStore } from './kv-store';
 
 export function getCatalogArticles() {
     return dbStore.articles.map(a => ({
@@ -42,6 +43,9 @@ export function logCitation(articleId: string, consumerFingerprint: string, cons
             earned_at: new Date().toISOString()
         });
     }
+    
+    // Fire and forget persistence
+    persistStore();
     return Date.now();
 }
 
@@ -58,6 +62,7 @@ export function insertArticle(id: string, title: string, content: string, source
         created_at: d.toISOString()
     };
     dbStore.articles.push(newArticle);
+    persistStore();
     return newArticle;
 }
 
@@ -65,6 +70,7 @@ export function updateArticlePrice(id: string, newPrice: number) {
     const article = dbStore.articles.find(a => a.id === id);
     if (article) {
         article.current_price = newPrice;
+        persistStore();
     }
 }
 

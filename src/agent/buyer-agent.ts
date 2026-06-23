@@ -1,5 +1,6 @@
 import { dbStore } from '../db/schema';
 import { getCatalogArticles, logCitation, updateArticlePrice } from '../db/queries';
+import { persistStore } from '../db/kv-store';
 
 /**
  * Buyer Agent — Simulates an autonomous AI researcher that:
@@ -88,6 +89,8 @@ export async function runBuyerAgent(): Promise<BuyerAgentResult> {
             signals: JSON.stringify({ buyer, reasoning }),
             adjusted_at: new Date().toISOString()
         });
+
+        persistStore();
 
         details.push({ articleId: article.id, title: article.title, price: priceToPay, buyer, reasoning });
         console.log(`[BuyerAgent] Purchased "${article.title}" for $${priceToPay.toFixed(4)} — ${buyer}`);
