@@ -314,6 +314,8 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  min-width: 0;
   overflow: hidden; /* fixed on desktop, content-section scrolls */
   background: var(--bg);
 }
