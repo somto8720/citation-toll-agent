@@ -35,6 +35,9 @@ export async function processPayouts() {
             
             // If we have real keys, execute on Arc Testnet via Circle SDK
             if (process.env.CIRCLE_API_KEY) {
+                // Add a 500ms delay to prevent Circle API rate limiting on 20+ publishers
+                await new Promise(r => setTimeout(r, 500));
+                
                 const response = await circleClient.createTransaction({
                     walletId: process.env.AGENT_WALLET_ID || '',
                     tokenId: process.env.USDC_TOKEN_ID || '',
@@ -55,21 +58,21 @@ export async function processPayouts() {
                 console.log(`Simulated Payout successful. TxHash: ${txHash}`);
             }
 
-                // Mark as paid
-                for (const e of dbStore.earnings) {
-                    if (e.creator_wallet === wallet && e.paid_out === 0) {
-                        e.paid_out = 1;
-                        e.payout_tx_hash = txHash;
-                    }
+            // Mark as paid
+            for (const e of dbStore.earnings) {
+                if (e.creator_wallet === wallet && e.paid_out === 0) {
+                    e.paid_out = 1;
+                    e.payout_tx_hash = txHash;
                 }
-
-            } catch (e: any) {
-                console.error(`Failed to send payout to ${wallet}:`, e.message);
-                if (e.response?.data) {
-                    console.error('Circle SDK Error details:', e.response.data);
-                    throw new Error(`Circle API Error: ${JSON.stringify(e.response.data)}`);
-                }
-                throw e;
             }
+
+        } catch (e: any) {
+            console.error(`Failed to send payout to ${wallet}:`, e.message);
+            if (e.response?.data) {
+                console.error('Circle SDK Error details:', e.response.data);
+            }
+            // We don't throw here. We want the loop to continue processing other creators' payouts
+            // even if one fails (e.g. invalid wallet address or momentary rate limit).
+        }
     }
 }
