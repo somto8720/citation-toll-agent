@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const PLATFORM_FEE_PERCENTAGE = 0.15; // 15% platform fee
-const MIN_PAYOUT_THRESHOLD = 0.10; // Trigger payout when creator has $0.10+
+const MIN_PAYOUT_THRESHOLD = 0.001; // Trigger payout when creator has $0.001+
 
 // Initialize Circle SDK
 const circleClient = initiateDeveloperControlledWalletsClient({
