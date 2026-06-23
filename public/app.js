@@ -28,6 +28,30 @@ hamburgerBtn?.addEventListener('click', openSidebar);
 sidebarCloseBtn?.addEventListener('click', closeSidebar);
 overlay?.addEventListener('click', closeSidebar);
 
+/* 📱 Responsive Layout Shifter 📱 */
+function adaptLayout() {
+    const publisherCard = document.querySelector('.publisher-card');
+    const dash = $('dashboard');
+    const side = $('sidebar');
+    
+    if (!publisherCard || !dash || !side) return;
+
+    if (window.innerWidth <= 768) {
+        // On mobile: Move sign-up card to the very top of the dashboard feed so it's instantly visible
+        if (publisherCard.parentElement === side) {
+            dash.insertBefore(publisherCard, dash.firstChild);
+        }
+    } else {
+        // On desktop: Keep it in the sidebar
+        if (publisherCard.parentElement === dash) {
+            side.appendChild(publisherCard);
+        }
+    }
+}
+window.addEventListener('resize', adaptLayout);
+document.addEventListener('DOMContentLoaded', adaptLayout);
+adaptLayout(); // Run immediately on load
+
 /* ── Navigation ── */
 const navItems = document.querySelectorAll('.nav-item[data-section]');
 const sections = document.querySelectorAll('.content-section');
