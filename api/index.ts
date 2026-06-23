@@ -248,6 +248,21 @@ app.post('/api/articles/submit', async (req, res) => {
         let feed;
         try {
             feed = await fetchFeed(feedUrl);
+
+            // Fallback for specific article URLs: if the feed has 0 items (e.g. WordPress comment feed), try the root domain
+            if (!feed.items || feed.items.length === 0) {
+                try {
+                    const rootFeedUrl = new URL(feedUrl).origin + '/feed';
+                    if (rootFeedUrl !== feedUrl && !feedUrl.includes('medium.com')) {
+                        const fallbackFeed = await fetchFeed(rootFeedUrl);
+                        if (fallbackFeed.items && fallbackFeed.items.length > 0) {
+                            feed = fallbackFeed;
+                        }
+                    }
+                } catch (fallbackError) {
+                    // Ignore fallback errors
+                }
+            }
         } catch (feedErr: any) {
             return res.status(400).json({
                 error: `Could not fetch RSS feed from "${feedUrl}". Make sure your blog has an RSS feed enabled. Tip: try pasting the direct RSS URL (e.g. yourblog.com/feed or yourblog.com/rss.xml).`
@@ -255,7 +270,7 @@ app.post('/api/articles/submit', async (req, res) => {
         }
 
         if (!feed || !feed.items || feed.items.length === 0) {
-            return res.status(400).json({ error: 'Found the RSS feed but it contains no articles yet.' });
+            return res.status(400).json({ error: 'Found an RSS feed but it contains no articles. If you pasted a specific article link, please use your blog homepage instead (e.g., https://yourblog.com).' });
         }
 
         // Ingest up to 5 articles to populate the catalog
