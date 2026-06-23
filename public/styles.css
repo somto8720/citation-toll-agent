@@ -424,6 +424,7 @@ body {
 .content-section {
   display: none;
   flex: 1;
+  min-height: 0; /* Required to allow scrolling in flex column */
   padding: 24px 28px;
   overflow-y: auto;
   flex-direction: column;
@@ -880,6 +881,7 @@ body {
   .main-content {
     width: 100%;
     flex: 1;
+    min-height: 0; /* Required to allow scrolling in flex column */
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
